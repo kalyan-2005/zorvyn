@@ -1,8 +1,7 @@
-const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api`;
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+  const res = await fetch(`/api/${endpoint}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
