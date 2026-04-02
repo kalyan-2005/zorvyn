@@ -17,8 +17,6 @@ export default function DashboardLayout({
   const [profile, setProfile] = useState<{ name: string; role: string } | null>(
     null,
   );
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [profileError, setProfileError] = useState("");
 
   useEffect(() => {
     apiFetch("/auth/me")
@@ -26,7 +24,7 @@ export default function DashboardLayout({
         setProfile(user);
       })
       .catch((err) => {
-        setProfileError(err.message || "Could not load profile");
+        console.log(err.message || "Could not load profile");
       });
   }, []);
 

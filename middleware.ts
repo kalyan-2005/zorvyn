@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const authPages = ["/login", "/register"];
-const publicPages = ["/", ...authPages];
 const protectedPages = [
   "/dashboard",
   "/records",
