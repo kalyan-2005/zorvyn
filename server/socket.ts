@@ -11,17 +11,17 @@ function getPort(): number {
     Boolean(process.env.RENDER_INSTANCE_ID) ||
     Boolean(process.env.RENDER_SERVICE_NAME);
 
-  const candidates = [
-    process.env.PORT,
-    process.env.SOCKET_PORT,
-    process.env.NEXT_PUBLIC_SOCKET_PORT,
-  ];
-  for (const raw of candidates) {
-    if (raw && raw.trim().length > 0) {
-      const n = Number.parseInt(raw, 10);
-      if (!Number.isNaN(n)) return n;
-    }
-  }
+  // const candidates = [
+  //   process.env.PORT,
+  //   process.env.SOCKET_PORT,
+  //   process.env.NEXT_PUBLIC_SOCKET_PORT,
+  // ];
+  // for (const raw of candidates) {
+  //   if (raw && raw.trim().length > 0) {
+  //     const n = Number.parseInt(raw, 10);
+  //     if (!Number.isNaN(n)) return n;
+  //   }
+  // }
   // Render default expected port (when PORT isn't set) is typically 10000.
   // Locally we default to 4000 to match the rest of the app.
   return isRender ? 10000 : 4000;

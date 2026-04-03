@@ -23,6 +23,7 @@ export async function GET(req: Request) {
       totalIncome,
       totalExpense,
       netBalance: totalIncome - totalExpense,
+      userId: user.id,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 403 });

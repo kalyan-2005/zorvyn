@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { StatCard } from "@/components/ui/StatCard";
 import { motion } from "framer-motion";
+import FinancialRecords from "../user/records";
 
 export default function ViewerDashboard() {
-  const [data, setData] = useState<{ totalIncome: number; totalExpense: number; netBalance: number }>({ totalIncome: 0, totalExpense: 0, netBalance: 0 });
+  const [data, setData] = useState<{ totalIncome: number; totalExpense: number; netBalance: number; userId: string }>({ totalIncome: 0, totalExpense: 0, netBalance: 0, userId: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -56,6 +57,7 @@ export default function ViewerDashboard() {
       </div>
 
       {/* Add more widgets or charts here in the future */}
+      <FinancialRecords userId={data.userId} />
     </motion.div>
   );
 }
