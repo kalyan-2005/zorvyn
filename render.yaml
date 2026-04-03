@@ -6,6 +6,8 @@ services:
   - type: web
     name: zorvyn-socket
     runtime: node
+    port: 4000
+    healthCheckPath: /health
     buildCommand: npm install
     startCommand: npm run socket:start
     envVars:
