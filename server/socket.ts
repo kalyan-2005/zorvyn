@@ -6,11 +6,16 @@ const globalForSocket = globalThis as typeof globalThis & {
 };
 
 function getPort(): number {
-  const raw =
-    process.env.PORT ?? process.env.SOCKET_PORT ?? process.env.NEXT_PUBLIC_SOCKET_PORT;
-  if (raw) {
-    const n = Number.parseInt(raw, 10);
-    if (!Number.isNaN(n)) return n;
+  const candidates = [
+    process.env.PORT,
+    process.env.SOCKET_PORT,
+    process.env.NEXT_PUBLIC_SOCKET_PORT,
+  ];
+  for (const raw of candidates) {
+    if (raw && raw.trim().length > 0) {
+      const n = Number.parseInt(raw, 10);
+      if (!Number.isNaN(n)) return n;
+    }
   }
   return 4000;
 }
@@ -86,6 +91,17 @@ function createIo(): Server {
     transports: ["websocket", "polling"],
   });
 
+  // Render (and some PaaS port detectors) validate a web service by making
+  // an HTTP request. Provide a minimal response so the service is detected.
+  httpServer.prependListener("request", (req, res) => {
+    const urlPath = (req.url ?? "").split("?")[0];
+    if (req.method === "GET" && (urlPath === "/" || urlPath === "/health")) {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.end("ok");
+    }
+  });
+
   httpServer.prependListener("request", (req, res) => {
     const url = req.url ?? "";
     if (req.method === "POST" && url.split("?")[0] === "/internal/emit") {
@@ -107,8 +123,11 @@ function createIo(): Server {
   });
 
   const port = getPort();
+  console.log(
+    `Socket server selected port=${port} (env PORT=${process.env.PORT ?? "unset"}, SOCKET_PORT=${process.env.SOCKET_PORT ?? "unset"}, NEXT_PUBLIC_SOCKET_PORT=${process.env.NEXT_PUBLIC_SOCKET_PORT ?? "unset"})`
+  );
   if (shouldListen()) {
-    httpServer.listen(port, () => {
+    httpServer.listen(port, "0.0.0.0", () => {
       console.log(`Socket server listening on port ${port}`);
     });
   }

@@ -9,5 +9,8 @@ services:
     buildCommand: npm install
     startCommand: npm run socket:start
     envVars:
+      - key: PORT
+        value: "4000"
+      # Socket service secret used by the HTTP bridge.
       - key: SOCKET_EMIT_SECRET
         sync: false
