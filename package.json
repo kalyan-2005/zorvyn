@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "socket:start": "tsx server/socket.ts",
     "lint": "eslint"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "react-dom": "19.2.4",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
+    "tsx": "^4.19.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {

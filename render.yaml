@@ -1,0 +1,13 @@
+# Blueprint: deploy this repo as a separate Web Service for Socket.IO only.
+# In the Render dashboard: New → Blueprint → connect repo, or create a Web Service
+# manually with Build Command `npm install` and Start Command `npm run socket:start`.
+# Set SOCKET_EMIT_SECRET here (same value as Vercel). Render sets PORT automatically.
+services:
+  - type: web
+    name: zorvyn-socket
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm run socket:start
+    envVars:
+      - key: SOCKET_EMIT_SECRET
+        sync: false

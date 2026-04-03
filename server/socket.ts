@@ -1,4 +1,4 @@
-import { createServer } from "http";
+import { createServer, type IncomingMessage, type ServerResponse } from "http";
 import { Server } from "socket.io";
 
 const globalForSocket = globalThis as typeof globalThis & {
@@ -6,12 +6,70 @@ const globalForSocket = globalThis as typeof globalThis & {
 };
 
 function getPort(): number {
-  const raw = process.env.SOCKET_PORT ?? process.env.NEXT_PUBLIC_SOCKET_PORT;
+  const raw =
+    process.env.PORT ?? process.env.SOCKET_PORT ?? process.env.NEXT_PUBLIC_SOCKET_PORT;
   if (raw) {
     const n = Number.parseInt(raw, 10);
     if (!Number.isNaN(n)) return n;
   }
   return 4000;
+}
+
+function shouldListen(): boolean {
+  if (process.env.NEXT_PHASE === "phase-production-build") return false;
+  // Vercel and similar: no in-process socket listener; use HTTP bridge instead.
+  if (process.env.VERCEL === "1") return false;
+  return true;
+}
+
+function parseBody(req: IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    req.on("data", (c) => chunks.push(c));
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", reject);
+  });
+}
+
+function handleInternalEmit(
+  req: IncomingMessage,
+  res: ServerResponse,
+  io: Server
+): void {
+  const expected = process.env.SOCKET_EMIT_SECRET;
+  const auth = req.headers.authorization;
+  if (!expected || auth !== `Bearer ${expected}`) {
+    res.statusCode = 401;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ error: "unauthorized" }));
+    return;
+  }
+
+  void (async () => {
+    try {
+      const raw = await parseBody(req);
+      const body = JSON.parse(raw) as {
+        userId?: string;
+        event?: string;
+        payload?: unknown;
+      };
+      const { userId, event, payload } = body;
+      if (!userId || !event) {
+        res.statusCode = 400;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ error: "userId and event are required" }));
+        return;
+      }
+      io.to(userId).emit(event, payload);
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ ok: true }));
+    } catch {
+      res.statusCode = 400;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ error: "invalid body" }));
+    }
+  })();
 }
 
 function createIo(): Server {
@@ -28,6 +86,13 @@ function createIo(): Server {
     transports: ["websocket", "polling"],
   });
 
+  httpServer.prependListener("request", (req, res) => {
+    const url = req.url ?? "";
+    if (req.method === "POST" && url.split("?")[0] === "/internal/emit") {
+      handleInternalEmit(req, res, io);
+    }
+  });
+
   io.on("connection", (socket) => {
     console.log("Connected:", socket.id);
 
@@ -42,9 +107,7 @@ function createIo(): Server {
   });
 
   const port = getPort();
-  // next build imports route modules in many workers; instrumentation register() is skipped
-  // during phase-production-build, but this module still loads — never bind a port then.
-  if (process.env.NEXT_PHASE !== "phase-production-build") {
+  if (shouldListen()) {
     httpServer.listen(port, () => {
       console.log(`Socket server listening on port ${port}`);
     });
