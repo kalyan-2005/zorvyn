@@ -6,6 +6,11 @@ const globalForSocket = globalThis as typeof globalThis & {
 };
 
 function getPort(): number {
+  const isRender =
+    Boolean(process.env.RENDER_SERVICE_ID) ||
+    Boolean(process.env.RENDER_INSTANCE_ID) ||
+    Boolean(process.env.RENDER_SERVICE_NAME);
+
   const candidates = [
     process.env.PORT,
     process.env.SOCKET_PORT,
@@ -17,7 +22,9 @@ function getPort(): number {
       if (!Number.isNaN(n)) return n;
     }
   }
-  return 4000;
+  // Render default expected port (when PORT isn't set) is typically 10000.
+  // Locally we default to 4000 to match the rest of the app.
+  return isRender ? 10000 : 4000;
 }
 
 function shouldListen(): boolean {
