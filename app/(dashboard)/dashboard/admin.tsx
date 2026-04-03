@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function Admin() {
   const [users, setUsers] = useState<any[]>([]);
@@ -41,6 +42,8 @@ export default function Admin() {
 
     fetchUsers();
   };
+
+  const router = useRouter();
 
   return (
     <div>
@@ -99,7 +102,7 @@ export default function Admin() {
               animate={{ opacity: 1, y: 0 }}
               className="grid grid-cols-5 p-4 border-b border-slate-700 items-center"
             >
-              <span>{user.name}</span>
+              <span onClick={()=>router.push(`/user/${user.id}`)}>{user.name}</span>
               <span>{user.email}</span>
 
               {/* Role */}

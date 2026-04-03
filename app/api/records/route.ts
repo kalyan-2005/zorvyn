@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/middleware/roleGuard";
+import { io } from "@/server/socket";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -33,6 +34,8 @@ export async function POST(req: Request) {
         userId: user.id,
       },
     });
+
+    io.to(user.id).emit("financial-update", record);
 
     return NextResponse.json(record);
   } catch (err: any) {
