@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { apiFetch } from "@/lib/api";
 import {
   CartesianGrid,
   Line,
@@ -12,7 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { socket } from "@/lib/socketClient";
-import { LineChart as LineChartIcon } from "lucide-react";
+import { LineChart as LineChartIcon, Mail, User } from "lucide-react";
 
 type FinancialRecord = {
   id: string;
@@ -64,14 +65,48 @@ const fmtMoney = (n: number) =>
     maximumFractionDigits: 2,
   }).format(n);
 
-export default function FinancialRecords({ userId }: { userId: string }) {
+type UserProfile = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  createdAt: string;
+};
+
+function initialsFromName(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+export default function FinancialRecords({ userId, role }: { userId: string; role: string }) {
   const [records, setRecords] = useState<FinancialRecord[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(role === "ADMIN");
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/users/${userId}/financial-records`)
       .then((res) => res.json())
       .then((data) => setRecords(data.data ?? []));
   }, [userId]);
+
+  useEffect(() => {
+    if (role !== "ADMIN") return;
+    setProfileLoading(true);
+    setProfileError(null);
+    apiFetch(`users/${userId}`)
+      .then((data: UserProfile) => {
+        setUserProfile(data);
+      })
+      .catch(() => {
+        setProfileError("Could not load user profile.");
+        setUserProfile(null);
+      })
+      .finally(() => setProfileLoading(false));
+  }, [userId, role]);
 
   useEffect(() => {
     const onFinancialUpdate = (newRecord: unknown) => {
@@ -116,8 +151,8 @@ export default function FinancialRecords({ userId }: { userId: string }) {
   }, [records]);
 
   return (
-    <div className="p-4 max-w-4xl">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between mb-6">
+    <div>
+      {role == "ADMIN" && <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between mb-6">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-slate-100">
             Financial records
@@ -162,22 +197,78 @@ export default function FinancialRecords({ userId }: { userId: string }) {
             </div>
           </div>
         )}
-      </div>
+      </div>}
+
+      {role === "ADMIN" && (
+        <section
+          className="mb-6 rounded-xl border border-slate-700/80 bg-slate-800/40 p-4 shadow-lg shadow-black/20 sm:p-5"
+          aria-label="User profile"
+        >
+          {profileLoading && (
+            <div className="h-24 animate-pulse rounded-lg bg-slate-700/40" />
+          )}
+          {!profileLoading && profileError && (
+            <p className="text-sm text-rose-400">{profileError}</p>
+          )}
+          {!profileLoading && userProfile && (
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+              <div
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-indigo-500/30 bg-indigo-500/15 text-lg font-semibold text-indigo-200"
+                aria-hidden
+              >
+                {initialsFromName(userProfile.name)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2 gap-y-1">
+                  <h3 className="text-lg font-semibold tracking-tight text-slate-100">
+                    {userProfile.name}
+                  </h3>
+                  <span className="rounded-md border border-slate-600 bg-slate-900/50 px-2 py-0.5 text-xs font-medium text-slate-300">
+                    {userProfile.role}
+                  </span>
+                  <span
+                    className={`rounded-md border px-2 py-0.5 text-xs font-medium ${
+                      userProfile.status === "ACTIVE"
+                        ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                        : "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                    }`}
+                  >
+                    {userProfile.status}
+                  </span>
+                </div>
+                <p className="mt-1 flex items-start gap-2 text-sm text-slate-400">
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden />
+                  <span className="break-all">{userProfile.email}</span>
+                </p>
+                <p className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                  <User className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  Joined{" "}
+                  {new Date(userProfile.createdAt).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <section
-        className="mb-8 rounded-xl border border-slate-700/80 bg-slate-800/30 p-4 shadow-lg shadow-black/20"
+        className="rounded-xl border border-slate-700/80 bg-slate-800/30 p-4 shadow-lg shadow-black/20"
         aria-label="Balance history chart"
       >
         {chartData.length === 0 ? (
-          <div className="flex h-[280px] items-center justify-center rounded-lg border border-dashed border-slate-600/60 bg-slate-900/40 text-sm text-slate-500">
+          <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed border-slate-600/60 bg-slate-900/40 px-4 text-center text-sm text-slate-500 sm:h-[260px] md:h-[280px]">
             Add records to see your balance trend here.
           </div>
         ) : (
-          <div className="h-[300px] w-full min-w-0">
+          <div className="h-[240px] w-full min-w-0 sm:h-[280px] md:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={chartData}
-                margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+                margin={{ top: 8, right: 4, left: 0, bottom: 0 }}
               >
                 <CartesianGrid
                   strokeDasharray="3 3"

@@ -45,14 +45,14 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-slate-900">
+    <div className="relative flex min-h-screen items-center justify-center overflow-x-clip overflow-y-auto bg-slate-900 p-4 sm:p-6">
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-500/20 blur-[100px] rounded-full pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 p-8 rounded-3xl shadow-2xl relative z-10"
+        className="relative z-10 w-full max-w-md rounded-3xl border border-slate-700/50 bg-slate-800/60 p-5 shadow-2xl backdrop-blur-xl sm:p-8"
       >
         <div className="text-center mb-8">
           <Link
@@ -66,7 +66,7 @@ export default function Login() {
               Zorvyn
             </span>
           </Link>
-          <h2 className="text-3xl font-bold mb-2">Welcome Back</h2>
+          <h2 className="mb-2 text-2xl font-bold sm:text-3xl">Welcome Back</h2>
           <p className="text-slate-400">Sign in to manage your wealth.</p>
         </div>
 

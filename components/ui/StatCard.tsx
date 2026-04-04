@@ -34,13 +34,13 @@ export function StatCard({ title, value, type }: StatCardProps) {
   return (
     <motion.div
       whileHover={{ y: -5 }}
-      className="bg-slate-800/40 p-6 rounded-3xl border border-slate-700/50 flex flex-col items-center sm:items-start text-center sm:text-left shadow-lg backdrop-blur"
+      className="flex flex-col items-center rounded-3xl border border-slate-700/50 bg-slate-800/40 p-5 text-center shadow-lg backdrop-blur sm:items-start sm:p-6 sm:text-left"
     >
       <div className={`p-3 rounded-2xl ${bg} ${border} border mb-4 inline-flex items-center justify-center`}>
          <Icon className={`w-6 h-6 ${color}`} />
       </div>
       <p className="text-slate-400 font-medium mb-1">{title}</p>
-      <h3 className="text-3xl font-bold tracking-tight">
+      <h3 className="text-2xl font-bold tracking-tight sm:text-3xl">
         ₹{value.toLocaleString()}
       </h3>
     </motion.div>

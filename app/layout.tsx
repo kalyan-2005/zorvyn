@@ -28,7 +28,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-900 text-slate-200">
+      <body className="min-h-full min-w-0 flex flex-col bg-slate-900 text-slate-200">
         <AuthCookieSync />
         {children}
       </body>

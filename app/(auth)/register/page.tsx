@@ -55,7 +55,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-slate-900">
+    <div className="relative flex min-h-screen items-center justify-center overflow-x-clip overflow-y-auto bg-slate-900 p-4 sm:p-6">
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-500/20 blur-[100px] rounded-full pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none" />
 
@@ -76,7 +76,7 @@ export default function Register() {
               Zorvyn
             </span>
           </Link>
-          <h2 className="text-3xl font-bold mb-2">Create Account</h2>
+          <h2 className="mb-2 text-2xl font-bold sm:text-3xl">Create Account</h2>
           <p className="text-slate-400">Join Zorvyn and master your money.</p>
         </div>
 
