@@ -87,7 +87,6 @@ const toc = [
   { href: "#apis-viewer", label: "Viewer APIs" },
   { href: "#apis-analyst", label: "Analyst APIs" },
   { href: "#apis-admin", label: "Admin APIs" },
-  { href: "#apis-other", label: "Other endpoints" },
   { href: "#realtime", label: "Realtime" },
   { href: "#database", label: "Database" },
   { href: "#errors", label: "Errors & security" },
@@ -299,9 +298,10 @@ export default function DocsPage() {
                     ["Auth: /api/auth/me", "✓", "✓", "✓"],
                     ["Personal /api/records", "✓", "✓", "✓"],
                     ["/api/dashboard/summary", "✓", "✓", "✓"],
+                    ["GET /api/users/:id/financial-records", "✓", "—", "✓"],
                     ["/api/analytics/overview", "—", "✓", "✓"],
                     ["/api/users (list)", "—", "—", "✓"],
-                    ["/api/users/:id", "—", "—", "✓"],
+                    ["/api/users/:id (profile)", "—", "—", "✓"],
                     ["/api/admin/records", "—", "—", "✓"],
                   ].map(([area, v, a, ad]) => (
                     <tr key={String(area)} className="border-b border-slate-800/80">
@@ -381,7 +381,9 @@ export default function DocsPage() {
                 Returns the current user from the database:{" "}
                 <code className="text-slate-300">id</code>, <code className="text-slate-300">name</code>,{" "}
                 <code className="text-slate-300">email</code>, <code className="text-slate-300">role</code>,{" "}
-                <code className="text-slate-300">status</code>.
+                <code className="text-slate-300">status</code>. On failure, responds with{" "}
+                <code className="text-slate-300">401</code> and <code className="text-slate-300">{"{ error }"}</code>{" "}
+                (JWT missing/invalid/unauthorized).
               </p>
             </div>
 
@@ -432,6 +434,23 @@ export default function DocsPage() {
                 (see below).
               </p>
             </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+              <div className="flex flex-wrap items-center gap-2">
+                <Method m="GET" />
+                <code className="text-sm text-slate-200">/api/users/:id/financial-records</code>
+              </div>
+              <p className="mt-3 text-sm text-slate-400">
+                <strong className="text-slate-200">Roles:</strong> <Role>VIEWER</Role>
+                <Role>ADMIN</Role> only (<Role>ANALYST</Role> is not allowed by{" "}
+                <code className="text-slate-300">requireRole</code> here). Requires{" "}
+                <code className="text-slate-300">Authorization: Bearer</code>. Response:{" "}
+                <code className="text-slate-300">{"{ data: FinancialRecord[] }"}</code>, newest{" "}
+                <code className="text-slate-300">createdAt</code> first. The handler does not enforce{" "}
+                <code className="text-slate-300">:id === jwt.id</code> for viewers—only call with the
+                current user&apos;s id from trusted UI, or use as admin for any user.
+              </p>
+            </div>
           </section>
 
           <section className="mt-14 space-y-8" aria-labelledby="apis-analyst">
@@ -456,6 +475,10 @@ export default function DocsPage() {
               </p>
               <p className="mt-2 text-xs text-slate-500">
                 Also allowed for <Role>ADMIN</Role> (same payload).
+              </p>
+              <p className="mt-3 text-xs text-slate-500">
+                The per-user chart API (<code className="text-slate-400">GET /api/users/:id/financial-records</code>) is
+                not open to <Role>ANALYST</Role> in code; analysts rely on this org-wide endpoint for insights.
               </p>
             </div>
           </section>
@@ -535,26 +558,6 @@ export default function DocsPage() {
                 <code className="text-slate-300">category</code>, <code className="text-slate-300">note</code>,{" "}
                 <code className="text-slate-300">date</code>. Broadcasts update to the record owner&apos;s
                 socket room.
-              </p>
-            </div>
-          </section>
-
-          <section className="mt-14 space-y-8" aria-labelledby="apis-other">
-            <H2 id="apis-other" icon={Server}>
-              Other endpoints
-            </H2>
-
-            <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-5">
-              <div className="flex flex-wrap items-center gap-2">
-                <Method m="GET" />
-                <code className="text-sm text-slate-200">/api/users/:id/financial-records</code>
-              </div>
-              <p className="mt-3 text-sm text-slate-400">
-                Returns all financial records for the given <code className="text-slate-300">userId</code>, ordered by{" "}
-                <code className="text-slate-300">createdAt</code> descending.{" "}
-                <strong className="text-amber-200/90">There is no authentication or role check</strong> in
-                the current implementation; treat this as a known integration surface and protect or
-                gate it in production if the app is exposed publicly.
               </p>
             </div>
           </section>
@@ -646,23 +649,23 @@ enum UserStatus { ACTIVE INACTIVE }`}</Code>
             </H2>
             <ul className="list-inside list-disc space-y-2 text-slate-400">
               <li>
-                Failed <code className="text-slate-300">requireRole</code> typically returns JSON{" "}
-                <code className="text-slate-300">{"{ error: \"Unauthorized\" | \"Forbidden\" }"}</code> with status{" "}
-                <code className="text-slate-300">403</code> (handlers vary slightly; some admin routes return{" "}
-                <code className="text-slate-300">500</code> on thrown errors).
+                <code className="text-slate-300">requireRole</code> failures usually return{" "}
+                <code className="text-slate-300">403</code> with{" "}
+                <code className="text-slate-300">{"{ error: \"Unauthorized\" | \"Forbidden\" }"}</code>.{" "}
+                <code className="text-slate-300">/api/auth/me</code> uses <code className="text-slate-300">401</code>{" "}
+                for those errors. Some admin user routes catch errors as generic <code className="text-slate-300">500</code>.
               </li>
               <li>
-                Passwords are hashed with bcrypt at registration; never log or return passwords in new
-                endpoints.
+                Passwords are hashed with bcrypt at registration; avoid returning password fields from{" "}
+                <code className="text-slate-300">/api/auth/register</code> in production.
               </li>
               <li>
-                Keep <code className="text-slate-300">JWT_SECRET</code> strong and rotate with a session
-                invalidation strategy if compromised.
+                Keep <code className="text-slate-300">JWT_SECRET</code> strong; rotate if compromised.
               </li>
               <li>
-                Consider adding auth to <code className="text-slate-300">/api/users/:id/financial-records</code> and
-                enforcing <code className="text-slate-300">UserStatus.ACTIVE</code> on login for hardened
-                deployments.
+                Optional hardening: enforce <code className="text-slate-300">UserStatus.ACTIVE</code> on login;
+                restrict <code className="text-slate-300">GET .../financial-records</code> so{" "}
+                <Role>VIEWER</Role> may only read <code className="text-slate-300">:id</code> matching their JWT.
               </li>
             </ul>
           </section>

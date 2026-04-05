@@ -88,9 +88,11 @@ export default function FinancialRecords({ userId, role }: { userId: string; rol
   const [profileError, setProfileError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/users/${userId}/financial-records`)
-      .then((res) => res.json())
-      .then((data) => setRecords(data.data ?? []));
+    const fetchRecords = async () => {
+      const data = await apiFetch(`/users/${userId}/financial-records`)
+      setRecords(data.data ?? []);
+    };
+    fetchRecords();
   }, [userId]);
 
   useEffect(() => {
