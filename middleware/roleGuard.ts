@@ -1,8 +1,7 @@
-import { NextRequest } from "next/server";
 import { verifyToken } from "@/lib/auth";
 
 export function requireRole(allowedRoles: string[]) {
-  return (req: NextRequest) => {
+  return (req: Request) => {
     const token = req.headers.get("authorization")?.split(" ")[1];
 
     if (!token) throw new Error("Unauthorized");
