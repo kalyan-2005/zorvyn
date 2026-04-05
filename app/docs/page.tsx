@@ -7,6 +7,7 @@ import {
   Layers,
   Server,
   Shield,
+  UserCircle,
   Zap,
 } from "lucide-react";
 
@@ -82,6 +83,7 @@ function H3({ id, children }: { id?: string; children: React.ReactNode }) {
 
 const toc = [
   { href: "#overview", label: "Overview" },
+  { href: "#test-credentials", label: "Test credentials" },
   { href: "#rbac", label: "RBAC & auth" },
   { href: "#apis-public", label: "Public APIs" },
   { href: "#apis-viewer", label: "Viewer APIs" },
@@ -179,6 +181,51 @@ export default function DocsPage() {
             This document describes how the Zorvyn server is structured: role-based access
             control, every HTTP route under <code className="rounded bg-slate-800 px-1.5 py-0.5 text-slate-300">/api</code>, the PostgreSQL data model via Prisma, and how clients should authenticate.
           </p>
+
+          <section className="mt-10 space-y-4" aria-labelledby="test-credentials">
+            <H2 id="test-credentials" icon={UserCircle}>
+              Test credentials
+            </H2>
+            <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200/95">
+              Development / demo only. Rotate or remove these accounts in production; never ship
+              shared weak passwords.
+            </p>
+            <p className="text-sm text-slate-400">
+              Password for all accounts below:{" "}
+              <code className="rounded bg-slate-800 px-2 py-0.5 font-mono text-slate-200">1234</code>
+            </p>
+            <div className="overflow-x-auto rounded-xl border border-slate-800">
+              <table className="w-full min-w-[420px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-800 bg-slate-900/50 text-xs uppercase tracking-wide text-slate-500">
+                    <th className="px-4 py-3 font-medium">Role</th>
+                    <th className="px-4 py-3 font-medium">Email</th>
+                  </tr>
+                </thead>
+                <tbody className="text-slate-300">
+                  <tr className="border-b border-slate-800/80">
+                    <td className="px-4 py-3 font-mono text-amber-300">ADMIN</td>
+                    <td className="px-4 py-3 font-mono">admin@gmail.com</td>
+                  </tr>
+                  <tr className="border-b border-slate-800/80">
+                    <td className="px-4 py-3 font-mono text-cyan-300">ANALYST</td>
+                    <td className="px-4 py-3 font-mono">analyst@gmail.com</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-mono text-indigo-300">VIEWER</td>
+                    <td className="px-4 py-3 font-mono">viewer1@gmail.com</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-sm text-slate-500">
+              Sign in at{" "}
+              <Link href="/login" className="text-indigo-400 hover:text-indigo-300">
+                /login
+              </Link>
+              .
+            </p>
+          </section>
 
           <section className="mt-14 space-y-6" aria-labelledby="overview">
             <H2 id="overview" icon={Layers}>
