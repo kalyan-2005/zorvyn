@@ -21,7 +21,13 @@ export function Navbar() {
           </span>
         </Link>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Link
+            href="/docs"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800/80 hover:text-slate-100"
+          >
+            Docs
+          </Link>
           <Link href="/login">
             <Button variant="ghost" className="cursor-pointer">Log in</Button>
           </Link>

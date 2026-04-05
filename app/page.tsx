@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, PieChart, Shield, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, PieChart, Shield, Zap } from "lucide-react";
 
 export default function Home() {
   const containerVariants = {
@@ -57,6 +57,16 @@ export default function Home() {
               <Button variant="secondary" className="w-full justify-center rounded-full px-6 py-3 text-sm sm:w-auto sm:px-8 sm:py-4 sm:text-lg">
                 Sign in to dashboard
               </Button>
+            </Link>
+          </motion.div>
+          <motion.div variants={itemVariants} className="mt-8">
+            <Link
+              href="/docs"
+              className="inline-flex items-center justify-center gap-2 text-sm font-medium text-indigo-400 transition-colors hover:text-indigo-300"
+            >
+              <BookOpen className="h-4 w-4" />
+              Backend &amp; API documentation
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </motion.div>
         </motion.div>
