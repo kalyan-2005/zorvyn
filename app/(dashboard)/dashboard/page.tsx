@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { StatCard } from "@/components/ui/StatCard";
 import { motion } from "framer-motion";
 import FinancialRecords from "../user/records";
+import { AnalystDashboard } from "@/components/AnalystDashboard";
 
 import Link from "next/link";
 import { Link2 } from "lucide-react";
@@ -264,7 +265,14 @@ export default function Page() {
   }, []);
   return (
     <div className="min-w-0">
-      {profile && (profile.role === "ADMIN" ? <AdminDashboard /> : <ViewerDashboard role={profile.role} />)}
+      {profile &&
+        (profile.role === "ADMIN" ? (
+          <AdminDashboard />
+        ) : profile.role === "ANALYST" ? (
+          <AnalystDashboard />
+        ) : (
+          <ViewerDashboard role={profile.role} />
+        ))}
     </div>
   );
 }

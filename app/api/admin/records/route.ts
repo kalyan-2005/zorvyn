@@ -18,7 +18,9 @@ function parseMonth(month: string | null): { start: Date; end: Date } | null {
 
 export async function GET(req: Request) {
   try {
-    const user: any = requireRole(["ADMIN"])(req as any);
+    const user: any = requireRole(["ADMIN","ANALYST"
+      
+    ])(req as any);
     void user;
 
     const { searchParams } = new URL(req.url);

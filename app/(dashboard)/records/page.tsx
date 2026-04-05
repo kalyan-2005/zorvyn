@@ -397,7 +397,7 @@ function UserRecordsView() {
   );
 }
 
-function AdminRecordsTable() {
+function AdminRecordsTable({ role }: { role: string }) {
   const router = useRouter();
 
   const now = useMemo(() => new Date(), []);
@@ -555,14 +555,14 @@ function AdminRecordsTable() {
 
         <div className="min-w-0 overflow-x-auto [-webkit-overflow-scrolling:touch]">
           <div className="min-w-[920px]">
-            <div className="grid grid-cols-7 gap-2 border-b border-slate-700 p-3 text-xs uppercase tracking-wide text-slate-400">
+            <div className={`grid grid-cols-7 gap-2 border-b border-slate-700 p-3 text-xs uppercase tracking-wide text-slate-400 ${role === "ANALYST" && "grid-cols-6"}`}>
               <div>User</div>
               <div>Category</div>
               <div>Type</div>
               <div className="text-right">Amount</div>
               <div>Date</div>
               <div>Note</div>
-              <div className="text-right">Actions</div>
+              <div className={`text-right ${role === "ANALYST" && "hidden"}`}>Actions</div>
             </div>
 
             {loading ? (
@@ -579,7 +579,7 @@ function AdminRecordsTable() {
                 return (
                   <div
                     key={r.id}
-                    className="grid grid-cols-7 gap-2 px-3 py-2 border-b border-slate-700 items-center text-sm"
+                    className={`grid grid-cols-${role === "ANALYST" ? 6 : 7} gap-2 px-3 py-2 border-b border-slate-700 items-center text-sm`}
                   >
                     <div className="min-w-[160px]">
                       <div
@@ -599,6 +599,7 @@ function AdminRecordsTable() {
                         onChange={(e) =>
                           setDraftField(r.id, { category: e.target.value })
                         }
+                        disabled={role === "ANALYST"}
                         className="w-full px-3 py-2 bg-slate-900/40 border border-slate-700 focus:border-indigo-500 rounded-lg text-slate-100 outline-none"
                       />
                     </div>
@@ -612,6 +613,7 @@ function AdminRecordsTable() {
                               e.target.value === "INCOME" ? "INCOME" : "EXPENSE",
                           })
                         }
+                        disabled={role === "ANALYST"}
                         className="w-full px-3 py-2 bg-slate-900/40 border border-slate-700 focus:border-indigo-500 rounded-lg text-slate-100 outline-none"
                       >
                         <option value="INCOME">INCOME</option>
@@ -627,6 +629,7 @@ function AdminRecordsTable() {
                         onChange={(e) =>
                           setDraftField(r.id, { amount: e.target.value })
                         }
+                        disabled={role === "ANALYST"}
                         className="w-full text-right px-3 py-2 bg-slate-900/40 border border-slate-700 focus:border-indigo-500 rounded-lg text-slate-100 outline-none"
                       />
                     </div>
@@ -635,6 +638,7 @@ function AdminRecordsTable() {
                       <input
                         type="date"
                         value={d?.date ?? toDateInputValue(r.date)}
+                        disabled={role === "ANALYST"}
                         onChange={(e) =>
                           setDraftField(r.id, { date: e.target.value })
                         }
@@ -645,6 +649,7 @@ function AdminRecordsTable() {
                     <div className="min-w-[200px]">
                       <input
                         value={d?.note ?? ""}
+                        disabled={role === "ANALYST"}
                         onChange={(e) =>
                           setDraftField(r.id, { note: e.target.value })
                         }
@@ -653,7 +658,7 @@ function AdminRecordsTable() {
                       />
                     </div>
 
-                    <div className="text-right">
+                    <div className={`text-right ${role === "ANALYST" && "hidden"}`}>
                       <button
                         onClick={() => saveRecord(r.id)}
                         disabled={isSaving}
@@ -719,5 +724,5 @@ export default function RecordsPage() {
     );
   }
 
-  return profile.role === "ADMIN" ? <AdminRecordsTable /> : <UserRecordsView />;
+  return profile.role === "VIEWER" ? <UserRecordsView /> : <AdminRecordsTable role={profile.role} />;
 }

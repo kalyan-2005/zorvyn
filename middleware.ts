@@ -8,6 +8,7 @@ const protectedPages = [
   "/api/dashboard",
   "/api/records",
   "/api/users",
+  "/api/analytics",
 ];
 
 export function middleware(req: NextRequest) {
@@ -39,6 +40,7 @@ export const config = {
     "/api/dashboard/:path*",
     "/api/records/:path*",
     "/api/users/:path*",
+    "/api/analytics/:path*",
     "/api/auth/me",
     "/login",
     "/register",
